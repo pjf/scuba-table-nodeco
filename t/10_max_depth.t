@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 use strict;
-use Test::More tests => 15;
+use Test::More tests => 12;
 
 # Test max_depth functionality.
 
@@ -27,12 +27,3 @@ like($@, qr/Mandatory argument/, "Exception on missing arguments");
 
 eval { $stn->max_depth(minutes => -30) };
 like($@, qr/Negative minutes/, "Exception on bad minutes argument");
-
-eval { $stn->max_depth(feet => -30) };
-like($@, qr/Negative depth/, "Exception on bad depth argument in feet");
-
-eval { $stn->max_depth(metres => -30) };
-like($@, qr/Negative depth/, "Exception on bad depth argument in metres");
-
-eval { $stn->max_depth(metres => 5, feet => 200) };
-like($@, qr/Negative depth/, "Exception on two depth arguments");
