@@ -127,12 +127,12 @@ our %LIMITS = (
 	#100 feet
 	30.0	=> [  3,   6,  8,  9, 10,  11,  12,  13,  14,  15,  16,  17,
 		     18,  19, 20],
-	#110 feet - XXX, Does the double-13 work here?  Test!!!
+	#110 feet
 	33.0	=> [  3,   6,  7,  8,  9,  10,  11,  12,  13,  13,  14,  15,
 		     16],
-	#120 feet - XXX, Test double-11
+	#120 feet
 	36.0	=> [  3,   5,  6,  7,  8,   9,  10,  11,  11,  12,  13],
-	#130 feet - XXX, Test double-7
+	#130 feet
 	39.0	=> [  3,   5,  6,  7,  7,   8,   9,  10],
 	#140 feet
 	42.0	=> [  0,   4,  5,  6,  7,   8],
@@ -183,9 +183,9 @@ our %SURFACE = (
 		my $end   = $start;
 		while ($end >= 0) {
 			$accum += $surface[$end];
-			$SURFACE{PADI}{chr(ord('A')+$start)}{chr(ord('A')+$end)}
-				= $accum         # Accumulated time
-				+ $start - $end; # Number of groups passed.
+			$SURFACE{PADI}
+			        {chr(ord('A')+$start)}
+			        {$accum + $start - $end} = chr(ord('A')+$end);
 			$end--;
 		}
 	}
@@ -624,6 +624,9 @@ Almost certainly.  If you find one, please report it to pjf@cpan.org.
 
 The PADI tables have very little testing in this release.  Please treat
 them with even more caution than normal.
+
+The PADI tables sometimes return the wrong group after a surface
+interval.
 
 =head1 TODO
 

@@ -12,4 +12,5 @@ t/07_pod.t
 t/08_exceptions.t
 t/09_whitebox.t
 t/10_max_depth.t
+t/11_padi.t
 lib/SCUBA/Table/NoDeco.pm
