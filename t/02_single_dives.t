@@ -2,7 +2,7 @@
 
 use strict;
 use warnings;
-use Test::More tests => 2+16+16;
+use Test::More tests => 3+16+16;
 
 BEGIN { use_ok('Sport::Dive::Tables') };
 
@@ -49,6 +49,9 @@ my $sdt = Sport::Dive::Tables->new();
 $sdt->dive(metres => 18, minutes => 30);
 
 is($sdt->group,"F","Dive for 18 metres for 30 minutes is group F");
+$sdt->clear;
+
+is($sdt->group,"","Group cleared");
 
 foreach my $depth (keys %MAX_TIMES) {
 	is($sdt->max_time(metres => $depth), $MAX_TIMES{$depth},

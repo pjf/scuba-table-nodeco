@@ -40,11 +40,6 @@ our %LIMITS = (
     },
 );
 
-# Which depths appear on the charts, in numerically ascending order.
-our %DEPTHS = (
-	SSI => [sort {$a <=> $b} keys %{$LIMITS{SSI}}],
-);
-
 our %SURFACE = (
     SSI => {
         A => { 12*60 => "A" },
@@ -72,6 +67,19 @@ our %RESIDUAL = (
 		39 => [ 3],
 	},
 );
+
+# Which depths appear on our limit charts, in numerically ascending order.
+our %LIMIT_DEPTHS = (
+	SSI => [sort {$a <=> $b} keys %{$LIMITS{SSI}}],
+);
+
+# Same for residual depths.  For SSI there are less depths on the residual
+# table, so we must interpret some repetitve dives as deeper than they
+# really are.
+our %RESIDUAL_DEPTHS = (
+	SSI => [sort {$a <=> $b} keys %{$RESIDUAL{SSI}}],
+);
+
 
 sub new {
 	my $class = shift;
@@ -103,6 +111,32 @@ sub _feet2metres {
 		croak "Missing mandatory 'feet' or 'metres' parameter to Sport::Dive::Tables::dive";
 	}
 	return $args{metres};
+}
+
+# This converts the depth given into a 'standard depth' as what appears
+# on the chart.  If we're performing a repetitive dive (ie, our group
+# is non-empty) then we'll read from RESIDUAL_DEPTHS, otherwise for
+# a fresh dive we'll read from LIMIT_DEPTHS.  This means we may treat
+# some shallow repetitve dives as deeper than they really are.  (This
+# errs on the side of safety).
+
+sub _std_depth {
+	my ($this, %args) = @_;
+	die "Incorrect call to Sport::Dive::Tables::_std_depth, no metres arg." unless $args{metres};
+
+	# Find the correct table to use.
+	my @depths;
+	if ($this->group) {
+		@depths = @{$RESIDUAL_DEPTHS{$this->{table}}};
+	} else {
+		@depths = @{$LIMIT_DEPTHS{$this->{table}}};
+	}
+
+	foreach my $depth (@depths) {
+		return $depth if $depth >= $args{metres};
+	}
+	local $Carp::CarpLevel = 1;	# Auto-strip one level of calls.
+	croak "Supplied depth $args{metres} metres is not on $this->{table} charts.";
 }
 
 # Clear all status, except table.  This is done by a recall of
@@ -141,9 +175,7 @@ sub rnt {
 
 	$args{metres} = $this->_feet2metres(%args);
 
-	# XXX - Depth should be calculated, since it may be between
-	# table entries.
-	my $depth = $args{metres};
+	my $depth = $this->_std_depth(metres => $args{metres});
 
 	# Lookup group, returning 0 RNT if they're completely free
 	# of nitrogen.
@@ -166,16 +198,18 @@ sub surface {
 	return $this->{surface};
 }
 
+# XXX - Handle RNT.
 sub max_time {
 	my ($this, %args) = @_;
 
 	$args{metres} = $this->_feet2metres(%args);
-	
-	# Walk through table until we find our depth, then lookup max.
-	foreach my $depth (@{$DEPTHS{$this->{table}}}) {
-		return $LIMITS{$this->{table}}{$depth}[-1] if $depth >= $args{metres};
-	}
-	croak "Depth of $args{metres} is not on $this->{table} table";
+	my $depth = $this->_std_depth(metres => $args{metres});
+
+	my $max_time = $LIMITS{$this->{table}}{$depth}[-1] - 
+	               $this->rnt(metres => $depth);
+
+	$max_time or croak "Depth of $args{metres} is not on $this->{table} table";
+	return $max_time;
 }
 
 sub dive {
@@ -192,24 +226,19 @@ sub dive {
 	# current dive depth.
 
 	my $group = "A";
+	my $depth = $this->_std_depth(metres => $args{metres});
 
-	foreach my $depth (@{$DEPTHS{$this->{table}}}) {
-		if ($depth >= $args{metres}) {
-			foreach my $time (@{$LIMITS{$this->{table}}{$depth}}) {
-				# Now walk through all our groups until
-				# we find one with a time equal to or
-				# greater than our current time.
-				# XXX - Compensate for residual N2 here.
+	foreach my $time (@{$LIMITS{$this->{table}}{$depth}}) {
+		# Now walk through all our groups until
+		# we find one with a time equal to or
+		# greater than our current time.
+		# XXX - Compensate for residual N2 here.
 
-				if ($time >= $args{minutes}) {
-					$this->{group} = $group;
-					return $group;
-				}
-				$group++;
-			}
-			$this->{bent} = "$args{minutes} exceeds maximum no-decompression time for a dive to $args{metres} metres.";
-			return;
+		if ($time >= $args{minutes}) {
+			$this->{group} = $group;
+			return $group;
 		}
+		$group++;
 	}
 	$this->{bent} = "Depth $args{metres} metres not available on $this->{table} table.";
 	return;
