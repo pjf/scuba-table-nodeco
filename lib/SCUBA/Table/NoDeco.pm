@@ -188,10 +188,11 @@ sub _init {
 	$this->{table}     = $args{table}   || "SSI"; # Tables to use.
 	$this->{group}     = $args{group}   || "";    # Initial group.
 	$this->{surface}   = $args{surface} || 0;     # Surface time.
-	$this->{bent}      = "";                      # Are we bent/reason?
 
 	$this->{dive_time} = 0; # Used for consequtive dives with less than...
 	$this->{last_depth}= 0; # ... MIN_SURFACE_TIME between them.
+
+	croak "Non-existant table $args{table} supplied" unless exists $RESIDUAL{$this->{table}};
 
 	return $this;
 }

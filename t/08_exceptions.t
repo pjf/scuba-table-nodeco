@@ -2,11 +2,16 @@
 
 use strict;
 use warnings;
-use Test::More tests => 11;
+use Test::More tests => 12;
 
 BEGIN { use_ok("SCUBA::Table::NoDeco"); }
 
-my $stn = SCUBA::Table::NoDeco->new(table => "SSI");
+my $stn;
+
+eval { $stn = SCUBA::Table::NoDeco->new(table => "Non-Existant"); };
+ok($@,"Non-existant table used");
+
+$stn = SCUBA::Table::NoDeco->new(table => "SSI");
 
 eval { $stn->dive(metres => 100, minutes => 30) };
 ok($@,"Dive outside of table's maximum depth");
