@@ -36,7 +36,7 @@ my %LIMITS => {
 # Which depths appear on the charts, in numerically ascending order.
 my %DEPTHS = {
 	SSI => [sort {$a <=> $b} keys %LIMITS],
-}
+};
 
 sub new {
 	my $class = shift;
