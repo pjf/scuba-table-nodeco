@@ -12,7 +12,14 @@ our $VERSION = "0.01";
 
 use constant FEET2METRES => 0.3;
 
-my %LIMITS = (
+# Less than 10 minutes surface is considered part of the same dive.
+# TODO - Create a test that checks < 10 minute surface dives.
+use constant MIN_SURFACE_TIME => 10;
+
+# More than MAX_SURFACE_TIME will consider us completely off-gassed.
+use constant MAX_SURFACE_TIME => 12*60;
+
+our %LIMITS = (
     SSI => {
          3.0    => [60, 120, 210, 300],
          4.5    => [35,  70, 110, 160, 225, 350],
@@ -34,8 +41,18 @@ my %LIMITS = (
 );
 
 # Which depths appear on the charts, in numerically ascending order.
-my %DEPTHS = (
+our %DEPTHS = (
 	SSI => [sort {$a <=> $b} keys %{$LIMITS{SSI}}],
+);
+
+our %SURFACE = (
+    SSI => {
+        A => { 12*60 => "A" },
+	B => { 12*60 => "A", 3*60+20 => "B" },
+	C => { 12*60 => "A", 4*60+49 => "B", 1*60+39 => "C" },
+	D => { 12*60 => "A", 5*60+48 => "B", 2*60+38 => "C", 1*60+9 => "D" },
+	# TODO, Finiish for E-K.
+    },
 );
 
 sub new {
@@ -55,7 +72,35 @@ sub _init {
 	return $this;
 }
 
-sub group { return $_[0]->{group}; }
+# XXX - Take into account surface time.
+sub group { 
+	my $this = shift;
+	if ($this->{surface} <= MIN_SURFACE_TIME) {
+		return $this->{group};
+	} elsif ($this->{surface} >= MAX_SURFACE_TIME) {
+		return "";
+	}
+
+	# Looks like we've been off-gassing for a while.  Let's
+	# find what group we're in now.
+
+	my @times = sort {$a <=> $b} keys %{$SURFACE{$this->{table}}{$this->{group}}};
+
+	foreach my $time (@times) {
+		if ($this->{surface} < $time) {
+			return $SURFACE{$this->{table}}{$this->{group}}{$time};
+		}
+	}
+	die("Incomplete table for $this->{surface} minutes surface interval in group $this->{group}");
+}
+
+# Returns total surface time.
+sub surface {
+	my ($this, %args) = @_;
+	$args{minutes} or return $this->{surface};
+	$this->{surface} += $args{minutes};
+	return $this->{surface};
+}
 
 sub max_time {
 	my ($this, %args) = @_;
@@ -71,6 +116,10 @@ sub max_time {
 
 sub dive {
 	my ($this, %args) = @_;
+
+	# Reset surface time.
+	# XXX - Update group first.
+	$this->{surface} = 0;
 
 	# Argument checking.  Yawn.
 
