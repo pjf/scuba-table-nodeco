@@ -6,6 +6,57 @@ use Carp;
 
 our $VERSION = "0.01";
 
+=head1 NAME
+
+SCUBA::Table::NoDeco - Calculate no-decompression dive times.
+
+=head1 SYNOPSIS
+
+  use SCUBA::Table::NoDeco;
+
+  my $table = SCUBA::Table::NoDeco->new();
+
+  $table->dive(metres => 15, minutes => 30);
+
+  print $table->group,"\n";	# Prints "E"
+
+  $table->surface(minutes => 60);
+
+  print $table->group,"\n";	# Prints "D"
+
+  print $table->max_time(metres => 30),"\n";	# Prints 6
+
+=head1 WARNING AND DISCLAIMER
+
+Do B<NOT> use this module as your sole source of no-decompression dive
+times.  This module is intended for use only as a guide to assist in
+planning your dives.  B<ALWAYS> calculate and verify your dive times
+by hand once you have planned your dives.  If you have a dive
+computer, follow its instructions for use.
+
+SCUBA diving involves serious risks of injury or death, and should
+only be performed by individuals in good health and with the appropriate
+skills and training.  Even when tables are used with proper safety
+procedures, decompression sickness may still occur.
+
+The author provides ABSOLUTELY NO WARRANTY on this module, without
+even the implied warranty of merchantability or fitness for a particular
+purpose.  Use entirely at your own risk.
+
+=head1 DESCRIPTION
+
+This module provides the ability to perform useful calculations
+using dive-tables, including calculating dive groups and maximum
+no-decompression times for repetitive dives.  A selection of tables
+are available.  The module assumes that the diver is using air as
+their breathing gas.
+
+=head1 METHODS
+
+The following methods are provided.
+
+=cut
+
 # There's really 0.3048 feet in a metre, but all the dive tables seem
 # to assume a flat 1 ft = 30 cm.  As such, we use the same constant here,
 # otherwise we end up with incorrect results.
@@ -86,6 +137,17 @@ our %RESIDUAL_DEPTHS = (
 	SSI => [sort {$a <=> $b} keys %{$RESIDUAL{SSI}}],
 );
 
+=head2 new
+
+    my $stn = SCUBA::Table::NoDeco->new(table => "SSI");
+
+This class method returns a SCUBA::Table::NoDeco object.  It takes
+an optional I<table> argument, specifying which dive table should be
+used.  If no dive table is supplied then the SSI tables are used.
+
+SSI tables are the only ones supported in the present release.
+
+=cut
 
 sub new {
 	my $class = shift;
@@ -149,78 +211,55 @@ sub _std_depth {
 	croak "Supplied depth $args{metres} metres is not on $this->{table} charts.";
 }
 
-# Clear all status, except table.  This is done by a recall of
-# _init.
+=head2 clear
+
+   $stn->clear();
+
+This method resets the object to its pristine state.  The table used for
+dive calculations is retained.
+
+=cut
+
+# Clear all status, except table.  This is done by clearing the underlying
+# hash entirely and recalling _init.  There is almost certainly a faster
+# and more effective way to remove all the keys without re-creating the
+# reference.
+
 sub clear {
-	$_[0]->_init(table => $_[0]->table);
+	my $table = $_[0]->table;
+	foreach my $key (keys %{$_[0]}) {
+		delete $_[0]->{$key};
+	}
+	$_[0]->_init(table => $table);
 }
 
-# Simple accessor method.
+=head2 table
+
+  print "You are using the ",$stn->table," tables\n";
+
+This method simply returns the name of the dive table being used by
+the C<SCUBA::Table::NoDeco> object.
+
+=cut
+
 sub table { return $_[0]->{table}; }
 
-sub group { 
-	my $this = shift;
-	if ($this->{surface} <= MIN_SURFACE_TIME) {
-		return $this->{group};
-	} elsif ($this->{surface} >= MAX_SURFACE_TIME) {
-		return "";
-	}
+=head2 dive
 
-	# Looks like we've been off-gassing for a while.  Let's
-	# find what group we're in now.
+  my $group = $stn->dive(feet   => 60, minutes => 30);
+  my $group = $stn->dive(metres => 18, minutes => 30);
 
-	my @times = sort {$a <=> $b} keys %{$SURFACE{$this->{table}}{$this->{group}}};
+This method determines and sets the diver's group for the dive information
+provided.  If the dive 'falls off' the tables, then an exception is
+returned.  This method takes into account the diver's current group,
+surface interval, and residual nitrogen time.
 
-	foreach my $time (@times) {
-		if ($this->{surface} < $time) {
-			return $SURFACE{$this->{table}}{$this->{group}}{$time};
-		}
-	}
-	die("Incomplete table for $this->{surface} minutes surface interval in group $this->{group}");
-}
+If the diver does not have a surface interval of at least 10 minutes,
+this will consider the dive to be a continuation of the previous
+dive.  The dive times will be added, and the maximum depth of both
+dives will be used to calculate the diver's group.
 
-# Residual nitrogen time.
-sub rnt {
-	my ($this, %args) = @_;
-
-	$args{metres} = $this->_feet2metres(%args);
-
-	my $depth = $this->_std_depth(metres => $args{metres});
-
-	# Lookup group, returning 0 RNT if they're completely free
-	# of nitrogen.
-
-	my $group = $this->group or return 0;
-
-	# Get the group index.  A is 0, B is 1, C is 2, ...
-	my $group_idx = ord($group) - ord('A');
-
-	# Now just lookup the RNT.
-	# XXX - What do we do if they're off the table?
-	return $RESIDUAL{$this->{table}}{$depth}[$group_idx];
-}
-
-# Returns total surface time.
-sub surface {
-	my ($this, %args) = @_;
-	$args{minutes} or return $this->{surface};
-	$this->{surface} += $args{minutes};
-	return $this->{surface};
-}
-
-# XXX - Handle RNT.
-sub max_time {
-	my ($this, %args) = @_;
-
-	$args{metres} = $this->_feet2metres(%args);
-	my $depth = $this->_std_depth(metres => $args{metres});
-
-	my $max_time = $LIMITS{$this->{table}}{$depth}[-1] - 
-	               $this->rnt(metres => $depth);
-
-	$max_time or croak "Depth of $args{metres} is not on $this->{table} table";
-	return $max_time;
-}
+=cut
 
 sub dive {
 	my ($this, %args) = @_;
@@ -259,64 +298,118 @@ sub dive {
 		}
 		$group++;
 	}
-	$this->{bent} = "Depth $args{metres} metres not available on $this->{table} table.";
-	return;
+
+	croak "SCUBA::Table::NoDeco::dive called with a depth or time not listed on the $this->{table} table";
+}
+
+=head2 group
+
+  print "You are a ",$stn->group," diver\n";
+
+The group method returns the current letter designation representing
+the amount of residual nitrogen present in the diver.  The letter
+designation is always upper-case.  A diver with no residual nitrogen
+has no group, represented by the empty string.
+
+=cut
+
+sub group { 
+	my $this = shift;
+	if ($this->{surface} <= MIN_SURFACE_TIME) {
+		return $this->{group};
+	} elsif ($this->{surface} >= MAX_SURFACE_TIME) {
+		return "";
+	}
+
+	# Looks like we've been off-gassing for a while.  Let's
+	# find what group we're in now.
+
+	my @times = sort {$a <=> $b} keys %{$SURFACE{$this->{table}}{$this->{group}}};
+
+	foreach my $time (@times) {
+		if ($this->{surface} < $time) {
+			return $SURFACE{$this->{table}}{$this->{group}}{$time};
+		}
+	}
+	die("Incomplete table for $this->{surface} minutes surface interval in group $this->{group}");
+}
+
+
+=head2 surface
+
+   $stn->surface(minutes => 60);	# Spend an hour on surface.
+   print "Total surface time ",$stn->surface," minutes\n";
+
+This method returns the total time of the current surface interval.
+If the optional C<minutes> argument is provided, this is added to the
+diver's current surface interval before returning the total minutes
+elapsed.
+
+=cut
+
+# Returns total surface time.
+sub surface {
+	my ($this, %args) = @_;
+	$args{minutes} or return $this->{surface};
+	$this->{surface} += $args{minutes};
+	return $this->{surface};
+}
+
+=head2 max_time
+
+  print "Your maximum time at 18 metres is ",$stn->max_time(metres => 18),"\n";
+  print "Your maximum time at 60 feet is   ",$stn->max_time(feet   => 60),"\n";
+
+This calculates the maximum no-decompression time for a dive to the
+specified depth.  The diver's current group is taken into account.
+
+=cut
+
+sub max_time {
+	my ($this, %args) = @_;
+
+	$args{metres} = $this->_feet2metres(%args);
+	my $depth = $this->_std_depth(metres => $args{metres});
+
+	my $max_time = $LIMITS{$this->{table}}{$depth}[-1] - 
+	               $this->rnt(metres => $depth);
+
+	$max_time or croak "Depth of $args{metres} is not on $this->{table} table";
+	return $max_time;
+}
+
+=head2 rnt
+
+   my $rnt  = $stn->rnt(metres => 12);
+   my $rnt2 = $stn->rnt(feet   => 40);
+
+This method returns the I<residual nitrogen time> for a diver, in minutes.
+The depth argument (in either metres or feet) is mandatory.
+
+=cut
+
+sub rnt {
+	my ($this, %args) = @_;
+
+	$args{metres} = $this->_feet2metres(%args);
+
+	my $depth = $this->_std_depth(metres => $args{metres});
+
+	# Lookup group, returning 0 RNT if they're completely free
+	# of nitrogen.
+
+	my $group = $this->group or return 0;
+
+	# Get the group index.  A is 0, B is 1, C is 2, ...
+	my $group_idx = ord($group) - ord('A');
+
+	# Now just lookup the RNT.
+	# XXX - What do we do if they're off the table?
+	return $RESIDUAL{$this->{table}}{$depth}[$group_idx];
 }
 
 1;
 __END__
-# Below is stub documentation for your module. You'd better edit it!
-
-=head1 NAME
-
-SCUBA::Table::NoDeco - Calculate no-decompression dive times.
-
-=head1 SYNOPSIS
-
-  use SCUBA::Table::NoDeco;
-
-  my $table = SCUBA::Table::NoDeco->new();
-
-  $table->dive(metres => 15, minutes => 30);
-
-  print $table->group,"\n";	# Prints "E"
-
-  $table->surface(minutes => 60);
-
-  print $table->group,"\n";	# Prints "D"
-
-  print $table->max_time(metres => 30),"\n";	# Prints 6
-
-=head1 WARNING AND DISCLAIMER
-
-Do B<NOT> use this module as your sole source of no-decompression
-dive times.  This module is intended for use only as a guide to
-planning your guides.  B<ALWAYS> calculate and verify your dive times
-by hand once you have planned your dives.  If you have a dive computer,
-follow its instructions for use.
-
-SCUBA diving involves serious risks of injury or death, and should
-only be performed by individuals in good health and with the appropriate
-skills and training.  Even when tables are used with proper safety
-procedures, decompression sickness may still occur.
-
-The author provides ABSOLUTELY NO WARRANTY on this module, without
-even the implied warranty of merchantability or fitness for a particular
-purpose.  Use entirely at your own risk.
-
-=head1 DESCRIPTION
-
-
-=head1 SEE ALSO
-
-Mention other useful documentation such as the documentation of
-related modules or operating system documentation (such as man pages
-in UNIX), or any relevant external documentation such as RFCs or
-standards.
-
-If you have a mailing list set up for your module, mention it here.
-
-If you have a web site set up for your module, mention it here.
 
 =head1 AUTHOR
 
