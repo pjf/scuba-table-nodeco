@@ -624,7 +624,8 @@ too lazy to use the module.
 
 Almost certainly.  If you find one, please report it to pjf@cpan.org.
 
-The PADI tables need more testing.
+The PADI tables have very little testing in this release.  Please treat
+them with even more caution than normal.
 
 =head1 TODO
 
