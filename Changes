@@ -29,3 +29,10 @@ Revision history for Perl extension Sport::Dive::Tables.
 	- CRITICAL: Discovered and fixed a programming error in PADI surface
 	  tables.  At best these resulted in an error being thrown when used,
 	  and at worst the incorrect results may be returned.
+
+	- Corrected an off-by-one error in surface interval calculations.
+
+	- PADI surface tables have been tweaked.  These tables are
+	  generated from an algorithm which does not exactly match the
+	  printed tables.  The reasons for these inconsistancies is
+	  open to speculation.

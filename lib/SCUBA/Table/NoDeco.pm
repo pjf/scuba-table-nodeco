@@ -172,7 +172,17 @@ our %SURFACE = (
 # appears to be added to each group transition beyond the first.
 # As such, we can dynamically generate the PADI surface table.
 
-# XXX - PJF, Test this lots and lots.
+# Unfortunately, this doesn't hold true for everything.  Some particular
+# entries have minor variations that then dissapear.  For example, D is
+# regular, E is not (there's a minute that's gained), and F
+# is regular.  Whether these are mistakes, intentional changes to
+# perform some sort of fingerprinting, or intentional changes with
+# a sound backing, I'm not sure.
+
+# In any case, it certainly makes testing more difficult.  What's
+# more correct, the table, or the precursor tables from which it appears
+# to have been derived?  I think for the moment we have to assume that
+# the tables themselves are considered definitive.
 
 {
 	my @surface = ( 3*60, 47, 21, 8, (7) x 2, 6, (5) x 3, (4) x 3,
@@ -192,6 +202,14 @@ our %SURFACE = (
 
 }
 
+# Per-row tweaks.  'E' gains a minute for moves to B and A.
+
+delete $SURFACE{PADI}{E}{86};	$SURFACE{PADI}{E}{87}  = "B";
+delete $SURFACE{PADI}{E}{267};	$SURFACE{PADI}{E}{268} = "A";
+
+# The 'O' and 'P' rows also does a funny thing at the end.
+delete $SURFACE{PADI}{O}{142};	$SURFACE{PADI}{O}{143} = "B";
+delete $SURFACE{PADI}{P}{146};	$SURFACE{PADI}{P}{147} = "B";
 
 # The PADI tables are highly consistant, in that the residual time
 # for each group is equal to the dive times on table 1.  This means
@@ -472,7 +490,10 @@ sub group {
 	my @times = sort {$a <=> $b} keys %{$SURFACE{$this->{table}}{$this->{group}}};
 
 	foreach my $time (@times) {
-		if ($this->{surface} < $time) {
+		# XXX - Changed from '<' to '<=' to accomodate PADI
+		#       tables.  Does this break the SSI tables, or did
+		# 	they also have an off-by-one error?  Check!
+		if ($this->{surface} <= $time) {
 			return $SURFACE{$this->{table}}{$this->{group}}{$time};
 		}
 	}
@@ -622,11 +643,9 @@ too lazy to use the module.
 
 Almost certainly.  If you find one, please report it to pjf@cpan.org.
 
-The PADI tables have very little testing in this release.  Please treat
-them with even more caution than normal.
-
-The PADI tables sometimes return the wrong group after a surface
-interval.
+The PADI tables are generated from an algorithm which provides almost
+an exact match to the printed PADI tables, however there are some
+inconsistancies.  Treat the PADI tables with particular care.
 
 =head1 TODO
 
