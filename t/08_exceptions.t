@@ -1,7 +1,7 @@
 #!/usr/bin/perl -w
 
 use strict;
-use Test::More tests => 14;
+use Test::More tests => 15;
 
 BEGIN { use_ok("SCUBA::Table::NoDeco"); }
 
@@ -47,3 +47,6 @@ ok($@,"Unsupported units supplied");
 
 eval { $stn->max_time(metres => 100) };
 ok($@,"Too great a depth for our tables");
+
+eval { local $^W = 0; $stn->surface(123) };	# No minutes argument supplied.
+like($@,qr/Mandatory argument/,"No minutes argument supplied");

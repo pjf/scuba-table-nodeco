@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 use strict;
-use Test::More tests => 90;
+use Test::More tests => 92;
 
 # Tests specific to the PADI tables.  I only have a copy of these
 # in feet, hence all the tests are in feet as well.  This is good,
@@ -75,10 +75,8 @@ foreach my $time (
 
 }
 
-__END__
-
 # Completely de-sat test.
 $sdt->clear;
 is($sdt->dive(feet => 40, minutes => 22),"C");
-$sdt->surface(4*60+11);
+$sdt->surface(minutes => 4*60+11);
 is($sdt->group,"","4:11 from group C is completely de-sat");

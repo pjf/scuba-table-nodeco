@@ -6,7 +6,7 @@ Revision history for Perl extension Sport::Dive::Tables.
 
 	- Released as SCUBA::Table::NoDeco.
 
-0.02  DATE GOES HERE
+0.02  Sat Dec 11 12:00:00 2004
 	- Expanded test suite to ensure correct behaviour when
 	  working with truncated or incomplete dive tabes.
 
@@ -23,7 +23,7 @@ Revision history for Perl extension Sport::Dive::Tables.
 
 	- Added PADI tables.  These need more testing.
 
-0.03  DATE GOES HERE
+0.03  Sat Dec 18 15:30:00 2004
 	- Expanded test suite to include more PADI specific tests.
 
 	- CRITICAL: Discovered and fixed a programming error in PADI surface
@@ -36,3 +36,10 @@ Revision history for Perl extension Sport::Dive::Tables.
 	  generated from an algorithm which does not exactly match the
 	  printed tables.  The reasons for these inconsistancies is
 	  open to speculation.
+
+	- Module is even more friendly to older Perls.
+
+	- Slightly expanded test suite on exceptional input.
+
+	- Updated module to deal with different minimum and maximum
+	  surface intervals per table.

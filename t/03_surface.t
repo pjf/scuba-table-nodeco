@@ -17,5 +17,5 @@ is($sdt->surface(minutes => 110),180,"180 minutes surface interval");
 is($sdt->group,"B","3:00 out of water, group B");
 is($sdt->surface(minutes => 180),360,"360 minutes surface interval");
 is($sdt->group,"A","6:00 out of water, group A");
-is($sdt->surface(minutes => 360),720,"720 minutes surface interval");
-is($sdt->group,"","12:00 out of water, no group");
+is($sdt->surface(minutes => 361),721,"721 minutes surface interval");
+is($sdt->group,"","12:01 out of water, no group");
