@@ -170,6 +170,19 @@ sub new {
 	return $this;
 }
 
+=head2 list_tables
+
+  my @tables = SCUBA::Table::NoDeco->list_tables();
+
+This method returns a list of tables that can be selected when creating
+a new SCUBA::Table::NoDeco object.
+
+=cut
+
+sub list_tables {
+	return keys %RESIDUAL;
+}
+
 sub _init {
 	my ($this, %args) = @_;
 	$this->{table}     = $args{table}   || "SSI"; # Tables to use.
