@@ -4,4 +4,5 @@ MANIFEST
 README
 t/01_interface.t
 t/02_single_dives.t
+t/03_surface.t
 lib/Sport/Dive/Tables.pm
