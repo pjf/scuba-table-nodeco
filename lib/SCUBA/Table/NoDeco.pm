@@ -12,7 +12,7 @@ our $VERSION = "0.01";
 
 use constant FEET2METRES => 0.3;
 
-my %LIMITS => {
+my %LIMITS = (
     SSI => {
          3.0    => [60, 120, 210, 300],
          4.5    => [35,  70, 110, 160, 225, 350],
@@ -31,12 +31,12 @@ my %LIMITS => {
 	36.0    => [ 0,   0,   5,  10],
 	39.0    => [ 0,   0,   5]
     },
-};
+);
 
 # Which depths appear on the charts, in numerically ascending order.
-my %DEPTHS = {
-	SSI => [sort {$a <=> $b} keys %LIMITS],
-};
+my %DEPTHS = (
+	SSI => [sort {$a <=> $b} keys %{$LIMITS{SSI}}],
+);
 
 sub new {
 	my $class = shift;
@@ -54,6 +54,8 @@ sub _init {
 	$this->{bent}    = "";                      # Are we bent/reason?
 	return $this;
 }
+
+sub group { return $_[0]->{group}; }
 
 sub dive {
 	my ($this, %args) = @_;
@@ -75,7 +77,7 @@ sub dive {
 
 	my $group = "A";
 
-	foreach my $depth (@$DEPTHS{$this->{table}}) {
+	foreach my $depth (@{$DEPTHS{$this->{table}}}) {
 		if ($depth >= $args{metres}) {
 			foreach my $time (@{$LIMITS{$this->{table}}{$depth}}) {
 				# Now walk through all our groups until
@@ -93,7 +95,7 @@ sub dive {
 			return;
 		}
 	}
-	$this->{bent} = "Depth $args{metres} metres not available on $this->{table} table."
+	$this->{bent} = "Depth $args{metres} metres not available on $this->{table} table.";
 	return;
 }
 
