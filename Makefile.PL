@@ -1,11 +1,12 @@
+#!/usr/bin/perl -w
+use strict;
 use ExtUtils::MakeMaker;
-# See lib/ExtUtils/MakeMaker.pm for details of how to influence
-# the contents of the Makefile that is written.
+
 WriteMakefile(
-    NAME              => 'Sport::Dive::Tables',
-    VERSION_FROM      => 'lib/Sport/Dive/Tables.pm', # finds $VERSION
+    NAME              => 'SCUBA::Table::NoDeco',
+    VERSION_FROM      => 'lib/SCUBA/Table/NoDeco.pm', # finds $VERSION
     PREREQ_PM         => {}, # e.g., Module::Name => 1.1
     ($] >= 5.005 ?     ## Add these new keywords supported since 5.005
-      (ABSTRACT_FROM  => 'lib/Sport/Dive/Tables.pm', # retrieve abstract from module
+      (ABSTRACT_FROM  => 'lib/SCUBA/Table/NoDeco.pm', # retrieve abstract from module
        AUTHOR         => 'Paul Fenwick <pjf@cpan.org>') : ()),
 );
