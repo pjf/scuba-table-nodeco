@@ -19,7 +19,7 @@ $sdt->surface(minutes => 3*60+17);
 is($sdt->group,"C");
 is($sdt->rnt(metres => 10.1), 25);
 $sdt->dive(metres => 10.1, minutes => 34);
-is($sdt->group,"E");
+is($sdt->group,"G");
 
 $sdt->surface(minutes => 3*60+34);
 is($sdt->group,"C");

@@ -50,7 +50,9 @@ our %SURFACE = (
                   54+ 0 => "E" },
 	F => { 12*60+ 0 => "A", 7*60+ 5 => "B", 3*60+57 => "C", 2*60+28 => "D",
 	        1*60+29 => "E", 0*60+45 => "F" },
-	# TODO, Finish for G-K.
+	G => { 12*60+ 0 => "A", 7*60+35 => "B", 4*60+25 => "C", 2*60+58 => "D",
+	        1*60+50 => "E", 1*60+15 => "F", 0*60+40 => "G" },
+	# TODO, Finish for H-K.
     },
 );
 
@@ -191,7 +193,7 @@ sub rnt {
 	my $group = $this->group or return 0;
 
 	# Get the group index.  A is 0, B is 1, C is 2, ...
-	my $group_idx = ord('A') - ord($group);
+	my $group_idx = ord($group) - ord('A');
 
 	# Now just lookup the RNT.
 	# XXX - What do we do if they're off the table?
