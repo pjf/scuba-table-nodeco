@@ -589,13 +589,22 @@ sub rnt {
 1;
 __END__
 
+=head1 SEE ALSO
+
+L<http://pjf.id.au/perl/scuba-table-nodeco/> - SCUBA::Table::NoDeco webpage,
+including links to support mailing list.
+
+L<http://pjf.id.au/dive/calc.html> - Online dive-planner for programmers
+too lazy to use the module.
+
 =head1 BUGS
 
 Almost certainly.  If you find one, please report it to pjf@cpan.org.
 
 =head1 TODO
 
-Add the ability to specify a default unit (metres/feet).
+Add the ability to specify a default unit (metres/feet) for methods
+that currently require them.
 
 =head1 AUTHOR
 
