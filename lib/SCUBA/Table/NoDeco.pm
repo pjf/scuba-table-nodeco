@@ -4,7 +4,7 @@ use strict;
 use warnings;
 use Carp;
 
-our $VERSION = "0.01";
+our $VERSION = "0.02";
 
 =head1 NAME
 
@@ -170,6 +170,20 @@ sub new {
 	return $this;
 }
 
+sub _init {
+	my ($this, %args) = @_;
+	$this->{table}     = $args{table}   || "SSI"; # Tables to use.
+	$this->{group}     = $args{group}   || "";    # Initial group.
+	$this->{surface}   = $args{surface} || 0;     # Surface time.
+
+	$this->{dive_time} = 0; # Used for consequtive dives with less than...
+	$this->{last_depth}= 0; # ... MIN_SURFACE_TIME between them.
+
+	croak "Non-existant table $args{table} supplied" unless exists $RESIDUAL{$this->{table}};
+
+	return $this;
+}
+
 =head2 list_tables
 
   my @tables = SCUBA::Table::NoDeco->list_tables();
@@ -183,7 +197,7 @@ sub list_tables {
 	return keys %RESIDUAL;
 }
 
-=head2 max_depth
+=head2 max_table_depth
 
   my $max_depth_ft = $stn->max_table_depth(units => "feet");
   my $max_depth_mt = $stn->max_table_depth(units => "metres");
@@ -201,22 +215,8 @@ sub max_table_depth {
 	} elsif ($args{units} eq "feet") {
 		return $RESIDUAL_DEPTHS{$this->table}[-1] / FEET2METRES;
 	} else {
-		croak "max_depth requires units parameter of 'metres' or 'feet'";
+		croak "max_table_depth requires units parameter of 'metres' or 'feet'";
 	}
-}
-
-sub _init {
-	my ($this, %args) = @_;
-	$this->{table}     = $args{table}   || "SSI"; # Tables to use.
-	$this->{group}     = $args{group}   || "";    # Initial group.
-	$this->{surface}   = $args{surface} || 0;     # Surface time.
-
-	$this->{dive_time} = 0; # Used for consequtive dives with less than...
-	$this->{last_depth}= 0; # ... MIN_SURFACE_TIME between them.
-
-	croak "Non-existant table $args{table} supplied" unless exists $RESIDUAL{$this->{table}};
-
-	return $this;
 }
 
 sub _feet2metres {
@@ -418,6 +418,9 @@ sub surface {
 This calculates the maximum no-decompression time for a dive to the
 specified depth.  The diver's current group is taken into account.
 
+If the diver cannot reach the depth supplied without breaking
+no-decompression limits then the value '0' is returned.
+
 =cut
 
 sub max_time {
@@ -429,14 +432,13 @@ sub max_time {
 	my $max_time = $LIMITS{$this->{table}}{$depth}[-1] - 
 	               $this->rnt(metres => $depth);
 
-	$max_time or croak "Depth of $args{metres} is not on $this->{table} table";
-	return $max_time;
+	return $max_time || 0;
 }
 
 =head2 max_depth
 
-  print "The maximum depth you may dive is ",$stn->max_depth,"\n";
-  print "Max depth for a 20 minute dive is ",$stn->max_depth(minutes => 20),"\n";
+  print "The maximum depth you may dive is ",$stn->max_depth(units => "metres")," metres\n";
+  print "Max depth for a 20 minute dive is ",$stn->max_depth(units => "feet", minutes => 20)," feet\n";
 
 This method returns the maximum possible depth given the diver's current
 group, or the maximum depth available on your table if no group is set.
@@ -444,14 +446,39 @@ group, or the maximum depth available on your table if no group is set.
 The method takes an optional argument (minutes), in which case the
 maximum depth for a dive of that duration will be returned.
 
-This function has not yet been implemented.
+This method returns '0' if the diver is not allowed to make *any* dive
+for the period of time specified.
 
 =cut
 
 sub max_depth {
 	my ($this, %args) = @_;
 
-	croak "Unimplemented function max_depth called";
+	$args{minutes} ||= 1;
+
+	croak "Negative minutes parameter supplied" if $args{minutes} < 0;
+	croak "Mandatory argument 'units' must be 'feet' or 'metres'"
+		unless ($args{units} eq 'feet' or $args{units} eq 'metres');
+
+	# False laziness alert!  Querying max_time repeatedly does
+	# provide the correct answer, but may not be particularly
+	# efficient.  There could be a better way.
+
+	foreach my $depth (reverse @{$RESIDUAL_DEPTHS{$this->table}}) {
+
+		# If the diver can spend the required amount of time
+		# at that depth, then we've got a match.
+		if ($this->max_time(metres => $depth) >= $args{minutes}) {
+			return $depth if $args{units} eq "metres";
+			return $depth / FEET2METRES;
+		}
+	}
+
+	# We've dropped off the end!  These tables say that the diver is
+	# not allowed to dive at all with their current nitrogen levels
+	# for that period of time.
+
+	return 0;
 
 }
 
@@ -493,11 +520,7 @@ Almost certainly.  If you find one, please report it to pjf@cpan.org.
 
 =head1 TODO
 
-The action of some methods such as C<max_depth> and C<max_time> may
-change when called with arguments that would result in figures being
-'off the tables'.  Currently these throw an exception, but it is
-proposed that they will return zero instead, as that accurately
-reflects the maximum depth/time available.
+Add the ability to specify a default unit (metres/feet).
 
 =head1 AUTHOR
 
