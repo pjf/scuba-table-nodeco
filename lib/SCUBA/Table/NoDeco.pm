@@ -183,6 +183,28 @@ sub list_tables {
 	return keys %RESIDUAL;
 }
 
+=head2 max_depth
+
+  my $max_depth_ft = $stn->max_depth(units => "feet");
+  my $max_depth_mt = $stn->max_depth(units => "metres");
+
+This method provides the maximum depth provided by the tables currently
+in use.  It I<does not> supply the maximum safe depth.  The units argument
+is mandatory.
+
+=cut
+
+sub max_depth {
+	my ($this, %args) = @_;
+	if ($args{units} eq "metres") {
+		return $RESIDUAL_DEPTHS{$this->table}[-1] 
+	} elsif ($args{units} eq "feet") {
+		return $RESIDUAL_DEPTHS{$this->table}[-1] / FEET2METRES;
+	} else {
+		croak "max_depth requires units parameter of 'metres' or 'feet'";
+	}
+}
+
 sub _init {
 	my ($this, %args) = @_;
 	$this->{table}     = $args{table}   || "SSI"; # Tables to use.
