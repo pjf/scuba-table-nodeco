@@ -20,3 +20,5 @@ Revision history for Perl extension Sport::Dive::Tables.
 	- INCOMPATIBLE: max_time now returns '0' when provided with
 	  a depth that is 'too deep'.  Previously, this would throw
 	  an exception.
+
+	- Added PADI tables.  These need more testing.
