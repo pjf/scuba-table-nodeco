@@ -5,4 +5,5 @@ README
 t/01_interface.t
 t/02_single_dives.t
 t/03_surface.t
+t/04_rnt.t
 lib/Sport/Dive/Tables.pm

@@ -90,7 +90,15 @@ sub _init {
 	return $this;
 }
 
-# XXX - Take into account surface time.
+# Clear all status, except table.  This is done by a recall of
+# _init.
+sub clear {
+	$_[0]->_init(table => $_[0]->table);
+}
+
+# Simple accessor method.
+sub table { return $_[0]->{table}; }
+
 sub group { 
 	my $this = shift;
 	if ($this->{surface} <= MIN_SURFACE_TIME) {
@@ -110,6 +118,30 @@ sub group {
 		}
 	}
 	die("Incomplete table for $this->{surface} minutes surface interval in group $this->{group}");
+}
+
+# Residual nitrogen time.
+sub rnt {
+	my ($this, %args) = @_;
+	croak "Required field 'metres' or 'feet' not supplied to Sport::Dive::Tables::rnt" unless $args{metres} or $args{feet};
+	# XXX - Implement feet2metres.
+	die "Feature not implemented" unless $args{metres};
+
+	# XXX - Depth should be calculated, since it may be between
+	# table entries.
+	my $depth = $args{metres};
+
+	# Lookup group, returning 0 RNT if they're completely free
+	# of nitrogen.
+
+	my $group = $this->group or return 0;
+
+	# Get the group index.  A is 0, B is 1, C is 2, ...
+	my $group_idx = ord('A') - ord($group);
+
+	# Now just lookup the RNT.
+	# XXX - What do we do if they're off the table?
+	return $RESIDUAL{$this->{table}}{$depth}[$group_idx];
 }
 
 # Returns total surface time.

@@ -1,0 +1,16 @@
+#!/usr/bin/perl
+
+use strict;
+use warnings;
+use Test::More tests => 6;
+
+BEGIN { use_ok('Sport::Dive::Tables') };
+
+my $sdt = Sport::Dive::Tables->new();
+
+$sdt->dive(metres => 10.5, minutes => 3);
+is($sdt->group,"A");
+is($sdt->rnt(metres => 3),39);
+is($sdt->rnt(metres => 6),18);
+is($sdt->rnt(metres => 9),12);
+is($sdt->rnt(metres => 39),3);
