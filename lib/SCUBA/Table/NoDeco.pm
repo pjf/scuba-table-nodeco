@@ -185,8 +185,8 @@ sub list_tables {
 
 =head2 max_depth
 
-  my $max_depth_ft = $stn->max_depth(units => "feet");
-  my $max_depth_mt = $stn->max_depth(units => "metres");
+  my $max_depth_ft = $stn->max_table_depth(units => "feet");
+  my $max_depth_mt = $stn->max_table_depth(units => "metres");
 
 This method provides the maximum depth provided by the tables currently
 in use.  It I<does not> supply the maximum safe depth.  The units argument
@@ -194,7 +194,7 @@ is mandatory.
 
 =cut
 
-sub max_depth {
+sub max_table_depth {
 	my ($this, %args) = @_;
 	if ($args{units} eq "metres") {
 		return $RESIDUAL_DEPTHS{$this->table}[-1] 
@@ -433,6 +433,28 @@ sub max_time {
 	return $max_time;
 }
 
+=head2 max_depth
+
+  print "The maximum depth you may dive is ",$stn->max_depth,"\n";
+  print "Max depth for a 20 minute dive is ",$stn->max_depth(minutes => 20),"\n";
+
+This method returns the maximum possible depth given the diver's current
+group, or the maximum depth available on your table if no group is set.
+
+The method takes an optional argument (minutes), in which case the
+maximum depth for a dive of that duration will be returned.
+
+This function has not yet been implemented.
+
+=cut
+
+sub max_depth {
+	my ($this, %args) = @_;
+
+	croak "Unimplemented function max_depth called";
+
+}
+
 =head2 rnt
 
    my $rnt  = $stn->rnt(metres => 12);
@@ -468,6 +490,14 @@ __END__
 =head1 BUGS
 
 Almost certainly.  If you find one, please report it to pjf@cpan.org.
+
+=head1 TODO
+
+The action of some methods such as C<max_depth> and C<max_time> may
+change when called with arguments that would result in figures being
+'off the tables'.  Currently these throw an exception, but it is
+proposed that they will return zero instead, as that accurately
+reflects the maximum depth/time available.
 
 =head1 AUTHOR
 
