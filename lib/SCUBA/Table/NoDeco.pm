@@ -90,6 +90,21 @@ sub _init {
 	return $this;
 }
 
+sub _feet2metres {
+	my ($this, %args) = @_;
+
+	local $Carp::CarpLevel = 1;	# Auto-strip one level of calls.
+
+	if ($args{feet} and $args{metres}) {
+		croak "Both feet and metres arguments supplied to Sport::Dive::Tables";
+	} elsif ($args{feet}) {
+		return $args{feet} * FEET2METRES;
+	} elsif (not $args{metres}) {
+		croak "Missing mandatory 'feet' or 'metres' parameter to Sport::Dive::Tables::dive";
+	}
+	return $args{metres};
+}
+
 # Clear all status, except table.  This is done by a recall of
 # _init.
 sub clear {
@@ -123,9 +138,8 @@ sub group {
 # Residual nitrogen time.
 sub rnt {
 	my ($this, %args) = @_;
-	croak "Required field 'metres' or 'feet' not supplied to Sport::Dive::Tables::rnt" unless $args{metres} or $args{feet};
-	# XXX - Implement feet2metres.
-	die "Feature not implemented" unless $args{metres};
+
+	$args{metres} = $this->_feet2metres(%args);
 
 	# XXX - Depth should be calculated, since it may be between
 	# table entries.
@@ -155,7 +169,7 @@ sub surface {
 sub max_time {
 	my ($this, %args) = @_;
 
-	# XXX - Metres or feet check and conversion.
+	$args{metres} = $this->_feet2metres(%args);
 	
 	# Walk through table until we find our depth, then lookup max.
 	foreach my $depth (@{$DEPTHS{$this->{table}}}) {
@@ -171,16 +185,7 @@ sub dive {
 	# XXX - Update group first.
 	$this->{surface} = 0;
 
-	# Argument checking.  Yawn.
-
-	$args{minutes} or croak "Missing mandatory 'minutes' parameter to Sport::Dive::Tables::dive";
-	if ($args{feet} and $args{metres}) {
-		croak "Both feet and metres arguments supplied to Sport::Dive::Tables";
-	} elsif ($args{feet}) {
-		$args{metres} = $args{feet} * FEET2METRES;
-	} elsif (not $args{metres}) {
-		croak "Missing mandatory 'feet' or 'metres' parameter to Sport::Dive::Tables::dive";
-	}
+	$args{metres} = $this->_feet2metres(%args);
 
 	# Calculate group.  This is done by looping over the list
 	# of depths until we find one equal to or greater than our
