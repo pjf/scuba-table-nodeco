@@ -3,4 +3,9 @@ Revision history for Perl extension Sport::Dive::Tables.
 0.01  Mon Dec  6 00:09:10 2004
 	- original version; created by h2xs 1.23 with options
 		-X Sport::Dive::Tables
+	- Released as SCUBA::Table::NoDeco.
 
+0.02
+	- Expanded test suite to ensure correct behaviour when
+	  working with truncated or incomplete dive tabes.
+	- Updated test suite to be kinder to older Perls.
