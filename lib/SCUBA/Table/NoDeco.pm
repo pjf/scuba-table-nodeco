@@ -423,12 +423,15 @@ sub rnt {
 	my $group_idx = ord($group) - ord('A');
 
 	# Now just lookup the RNT.
-	# XXX - What do we do if they're off the table?
 	return $RESIDUAL{$this->{table}}{$depth}[$group_idx];
 }
 
 1;
 __END__
+
+=head1 BUGS
+
+Almost certainly.  If you find one, please report it to pjf@cpan.org.
 
 =head1 AUTHOR
 
