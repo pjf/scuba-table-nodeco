@@ -152,7 +152,11 @@ our %RESIDUAL_DEPTHS = (
 
 This class method returns a SCUBA::Table::NoDeco object.  It takes
 an optional I<table> argument, specifying which dive table should be
-used.  If no dive table is supplied then the SSI tables are used.
+used.
+
+If no dive table is supplied then the module will use the default
+SSI table.  This default may change in future releases, so you should
+not rely upon this default.
 
 SSI tables are the only ones supported in the present release.
 
