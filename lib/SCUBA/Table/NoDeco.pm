@@ -191,10 +191,12 @@ sub _feet2metres {
 	if ($args{feet} and $args{metres}) {
 		croak "Both feet and metres arguments supplied to SCUBA::Table::NoDeco";
 	} elsif ($args{feet}) {
+		croak "Positive depth must be supplied" if $args{feet} <= 0;
 		return $args{feet} * FEET2METRES;
 	} elsif (not $args{metres}) {
 		croak "Missing mandatory 'feet' or 'metres' parameter to SCUBA::Table::NoDeco::dive";
 	}
+	croak "Positive depth must be supplied" if $args{metres} <= 0;
 	return $args{metres};
 }
 
@@ -276,6 +278,10 @@ dives will be used to calculate the diver's group.
 
 sub dive {
 	my ($this, %args) = @_;
+
+	$args{minutes} ||= 0;
+
+	croak "Positive minutes argument required for SCUBA::Table::NoDeco::dive" if $args{minutes} <= 0;
 
 	$args{metres} = $this->_feet2metres(%args);
 

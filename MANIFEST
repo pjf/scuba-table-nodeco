@@ -8,4 +8,6 @@ t/03_surface.t
 t/04_rnt.t
 t/05_non_stop.t
 t/06_repetitive.t
+t/07_pod.t
+t/08_exceptions.t
 lib/SCUBA/Table/NoDeco.pm
