@@ -586,8 +586,6 @@ The depth argument (in either metres or feet) is mandatory.
 If the depth supplied means that the diver cannot make a no-decompression
 dive, then an undefined value is returned.
 
-XXX - This behaviour may change.
-
 =cut
 
 sub rnt {
