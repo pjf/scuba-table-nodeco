@@ -4,9 +4,9 @@ use strict;
 use warnings;
 use Test::More tests => 6;
 
-BEGIN { use_ok('Sport::Dive::Tables') };
+BEGIN { use_ok('SCUBA::Table::NoDeco') };
 
-my $sdt = Sport::Dive::Tables->new();
+my $sdt = SCUBA::Table::NoDeco->new();
 
 $sdt->dive(metres => 10.5, minutes => 3);
 is($sdt->group,"A");

@@ -4,7 +4,7 @@ use strict;
 use warnings;
 use Test::More tests => 3+16+16;
 
-BEGIN { use_ok('Sport::Dive::Tables') };
+BEGIN { use_ok('SCUBA::Table::NoDeco') };
 
 my %MAX_TIMES = (
 	3.0  => 300,
@@ -44,7 +44,7 @@ my %MAX_TIMES_FT = (
 	130 =>   5,
 );
 
-my $sdt = Sport::Dive::Tables->new();
+my $sdt = SCUBA::Table::NoDeco->new();
 
 $sdt->dive(metres => 18, minutes => 30);
 

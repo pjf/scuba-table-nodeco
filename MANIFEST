@@ -8,4 +8,4 @@ t/03_surface.t
 t/04_rnt.t
 t/05_non_stop.t
 t/06_repetitive.t
-lib/Sport/Dive/Tables.pm
+lib/SCUBA/Table/NoDeco.pm

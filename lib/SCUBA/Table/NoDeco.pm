@@ -1,4 +1,4 @@
-package Sport::Dive::Tables;
+package SCUBA::Table::NoDeco;
 
 use strict;
 use warnings;
@@ -114,11 +114,11 @@ sub _feet2metres {
 	local $Carp::CarpLevel = 1;	# Auto-strip one level of calls.
 
 	if ($args{feet} and $args{metres}) {
-		croak "Both feet and metres arguments supplied to Sport::Dive::Tables";
+		croak "Both feet and metres arguments supplied to SCUBA::Table::NoDeco";
 	} elsif ($args{feet}) {
 		return $args{feet} * FEET2METRES;
 	} elsif (not $args{metres}) {
-		croak "Missing mandatory 'feet' or 'metres' parameter to Sport::Dive::Tables::dive";
+		croak "Missing mandatory 'feet' or 'metres' parameter to SCUBA::Table::NoDeco::dive";
 	}
 	return $args{metres};
 }
@@ -132,7 +132,7 @@ sub _feet2metres {
 
 sub _std_depth {
 	my ($this, %args) = @_;
-	die "Incorrect call to Sport::Dive::Tables::_std_depth, no metres arg." unless $args{metres};
+	die "Incorrect call to SCUBA::Table::NoDeco::_std_depth, no metres arg." unless $args{metres};
 
 	# Find the correct table to use.
 	my @depths;
@@ -269,13 +269,13 @@ __END__
 
 =head1 NAME
 
-Sport::Dive::Tables - Calculate no-decompression dive times.
+SCUBA::Table::NoDeco - Calculate no-decompression dive times.
 
 =head1 SYNOPSIS
 
-  use Sport::Dive::Tables;
+  use SCUBA::Table::NoDeco;
 
-  my $table = Sport::Dive::Tables->new();
+  my $table = SCUBA::Table::NoDeco->new();
 
   $table->dive(metres => 15, minutes => 30);
 

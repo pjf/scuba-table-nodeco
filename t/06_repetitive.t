@@ -6,9 +6,9 @@ use strict;
 use warnings;
 use Test::More tests => 11;
 
-BEGIN { use_ok('Sport::Dive::Tables') };
+BEGIN { use_ok('SCUBA::Table::NoDeco') };
 
-my $sdt = Sport::Dive::Tables->new(table => "SSI");
+my $sdt = SCUBA::Table::NoDeco->new(table => "SSI");
 
 # Dives from PJF's logbook, #3-#6
 
