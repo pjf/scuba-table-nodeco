@@ -164,24 +164,43 @@ our %SURFACE = (
 		1*60+11 => "I", 0*60+49 => "J", 0*60+28 => "K" },
     },
 
-#	PADI tables seem to have a consistant transition between
-#	groups (it always takes 3 hours to get out of group A, always
-#	takes 47 minutes to get out of group B).  This means that the
-#	actual lookup table can be dynamically generated.
-
-    PADI => {
-	A => {  3*60+ 0 => "A" },
-	B => {  3*60+48 => "A", 0*60+47 => "B" },
-	# XXX - To be completed.
-    },
 );
 
+# PADI tables seem to have a consistant transition between
+# groups (it always takes 3 hours to get out of group A, always
+# takes 47 minutes to get out of group B).  An extra minute
+# appears to be added to each group transition beyond the first.
+# As such, we can dynamically generate the PADI surface table.
+
+# XXX - PJF, Test this lots and lots.
+
+{
+	my @surface = ( 3*60, 47, 21, 8, (7) x 2, 6, (5) x 3, (4) x 3,
+			(3) x 6, (2) x 7 );
+
+	foreach my $start (0..25) {
+		my $accum = 0;
+		my $end   = $start;
+		while ($end >= 0) {
+			$accum += $surface[$end];
+			$SURFACE{PADI}{chr(ord('A')+$start)}{chr(ord('A')+$end)}
+				= $accum         # Accumulated time
+				+ $start - $end; # Number of groups passed.
+			$end--;
+		}
+	}
+
+}
+
+
 # The PADI tables are highly consistant, in that the residual time
-# for each group is equal to the dive times on table 1.  Again, this
-# means we can dynamically generate the table.
+# for each group is equal to the dive times on table 1.  This means
+# that in our representation of these tables, they are exactly the same.
+# Rather convenient.
 #
 # XXX - Consider what this means for repetitive dives with no surface
-# interval.  Does it work to treat these as separate dives?
+# interval.  Does it work to treat these as separate dives?  Yes, it
+# appears it does.
 
 our %RESIDUAL = (
 	SSI => {
@@ -199,18 +218,21 @@ our %RESIDUAL = (
 		36 => [ 3,  6,   9],
 		39 => [ 3],
 	},
+	PADI => $LIMITS{PADI},
 );
 
 # Which depths appear on our limit charts, in numerically ascending order.
 our %LIMIT_DEPTHS = (
-	SSI => [sort {$a <=> $b} keys %{$LIMITS{SSI}}],
+	SSI  => [sort {$a <=> $b} keys %{$LIMITS{SSI}}],
+	PADI => [sort {$a <=> $b} keys %{$LIMITS{PADI}}],
 );
 
 # Same for residual depths.  For SSI there are less depths on the residual
 # table, so we must interpret some repetitve dives as deeper than they
 # really are.
 our %RESIDUAL_DEPTHS = (
-	SSI => [sort {$a <=> $b} keys %{$RESIDUAL{SSI}}],
+	SSI  => [sort {$a <=> $b} keys %{$RESIDUAL{SSI}}],
+	PADI => [sort {$a <=> $b} keys %{$RESIDUAL{PADI}}],
 );
 
 =head2 new
@@ -269,9 +291,10 @@ sub list_tables {
   my $max_depth_ft = $stn->max_table_depth(units => "feet");
   my $max_depth_mt = $stn->max_table_depth(units => "metres");
 
-This method provides the maximum depth provided by the tables currently
-in use.  It I<does not> supply the maximum safe depth.  The units argument
-is mandatory.
+This method provides the maximum depth for repetitive dives provided by the
+tables currently in use.  Some tables may provide a greater depth for
+non-reptetitve dives.  This function I<does not> supply the maximum safe
+depth (however see L</max_depth>).  The units argument is mandatory.
 
 =cut
 
@@ -600,6 +623,8 @@ too lazy to use the module.
 =head1 BUGS
 
 Almost certainly.  If you find one, please report it to pjf@cpan.org.
+
+The PADI tables need more testing.
 
 =head1 TODO
 
