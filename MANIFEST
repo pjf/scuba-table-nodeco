@@ -2,5 +2,5 @@ Changes
 Makefile.PL
 MANIFEST
 README
-t/Sport-Dive-Tables.t
+t/01_interface.t
 lib/Sport/Dive/Tables.pm
