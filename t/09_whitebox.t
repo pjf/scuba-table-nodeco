@@ -1,10 +1,9 @@
-#!/usr/bin/perl
+#!/usr/bin/perl -w
 
 # White box testing.  Don't call these functions in your own code.
 
 use strict;
-use warnings;
-use Test::More tests => 4;
+use Test::More tests => 5;
 
 BEGIN { use_ok("SCUBA::Table::NoDeco"); }
 
@@ -22,3 +21,7 @@ $stn->surface(minutes => 15);
 	eval { $stn->group; };
 	like($@, qr/Incomplete table/, "Incomplete table discovered");
 }
+
+my $stn2 = SCUBA::Table::NoDeco->new(group => "C");
+$stn->dive(metres => 1, minutes => 1);
+is($stn->group,"C");

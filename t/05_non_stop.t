@@ -1,10 +1,9 @@
-#!/usr/bin/perl
+#!/usr/bin/perl -w
 
 # Test two dives in quick succession a less than 10 minute surface
 # interval.  These should be treated as the *same dive*.
 
 use strict;
-use warnings;
 use Test::More tests => 4;
 
 BEGIN { use_ok('SCUBA::Table::NoDeco') };

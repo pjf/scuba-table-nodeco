@@ -1,7 +1,6 @@
-#!/usr/bin/perl
+#!/usr/bin/perl -w
 
 use strict;
-use warnings;
 use Test::More tests => 3+16+16;
 
 BEGIN { use_ok('SCUBA::Table::NoDeco') };

@@ -1,5 +1,5 @@
+#!/usr/bin/perl -w
 use strict;
-use warnings;
 use Test::More tests => 7;
 
 my @methods = qw(new list_tables clear table dive group surface 
