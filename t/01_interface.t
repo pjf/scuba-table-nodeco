@@ -2,7 +2,7 @@ use strict;
 use warnings;
 use Test::More tests => 4;
 
-my @methods = qw(dive group);
+my @methods = qw(dive group max_time);
 
 BEGIN { use_ok('Sport::Dive::Tables') };
 

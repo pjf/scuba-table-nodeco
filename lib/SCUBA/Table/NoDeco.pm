@@ -57,6 +57,18 @@ sub _init {
 
 sub group { return $_[0]->{group}; }
 
+sub max_time {
+	my ($this, %args) = @_;
+
+	# XXX - Metres or feet check and conversion.
+	
+	# Walk through table until we find our depth, then lookup max.
+	foreach my $depth (@{$DEPTHS{$this->{table}}}) {
+		return $LIMITS{$this->{table}}{$depth}[-1] if $depth >= $args{metres};
+	}
+	croak "Depth of $args{metres} is not on $this->{table} table";
+}
+
 sub dive {
 	my ($this, %args) = @_;
 
