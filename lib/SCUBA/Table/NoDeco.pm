@@ -95,10 +95,14 @@ sub new {
 
 sub _init {
 	my ($this, %args) = @_;
-	$this->{table}   = $args{table}   || "SSI"; # Tables to use.
-	$this->{group}   = $args{group}   || "";    # Initial group.
-	$this->{surface} = $args{surface} || 0;     # Surface time.
-	$this->{bent}    = "";                      # Are we bent/reason?
+	$this->{table}     = $args{table}   || "SSI"; # Tables to use.
+	$this->{group}     = $args{group}   || "";    # Initial group.
+	$this->{surface}   = $args{surface} || 0;     # Surface time.
+	$this->{bent}      = "";                      # Are we bent/reason?
+
+	$this->{dive_time} = 0; # Used for consequtive dives with less than...
+	$this->{last_depth}= 0; # ... MIN_SURFACE_TIME between them.
+
 	return $this;
 }
 
@@ -219,10 +223,6 @@ sub max_time {
 sub dive {
 	my ($this, %args) = @_;
 
-	# Reset surface time.
-	# XXX - Update group first.
-	$this->{surface} = 0;
-
 	$args{metres} = $this->_feet2metres(%args);
 
 	# Calculate group.  This is done by looping over the list
@@ -231,14 +231,27 @@ sub dive {
 
 	my $group = "A";
 	my $depth = $this->_std_depth(metres => $args{metres});
+	my $tbt;
+
+	if ($this->surface > MIN_SURFACE_TIME) {
+		$tbt = $args{minutes} + $this->rnt(metres => $depth);
+	} else {
+		$tbt = $this->{dive_time} + $args{minutes};
+		$depth = $depth > $this->{last_depth} ? $depth : $this->{last_depth};
+	}
+
+	# Record dive information.
+
+	$this->{surface}    = 0;
+	$this->{last_depth} = $depth;
+	$this->{dive_time}  = $tbt;
 
 	foreach my $time (@{$LIMITS{$this->{table}}{$depth}}) {
 		# Now walk through all our groups until
 		# we find one with a time equal to or
 		# greater than our current time.
-		# XXX - Compensate for residual N2 here.
 
-		if ($time >= $args{minutes}) {
+		if ($time >= $tbt) {
 			$this->{group} = $group;
 			return $group;
 		}
