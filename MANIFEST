@@ -3,4 +3,5 @@ Makefile.PL
 MANIFEST
 README
 t/01_interface.t
+t/02_single_dives.t
 lib/Sport/Dive/Tables.pm
