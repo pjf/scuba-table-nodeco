@@ -1,0 +1,39 @@
+#!/usr/bin/perl
+
+use strict;
+use warnings;
+use Test::More tests => 11;
+
+BEGIN { use_ok("SCUBA::Table::NoDeco"); }
+
+my $stn = SCUBA::Table::NoDeco->new(table => "SSI");
+
+eval { $stn->dive(metres => 100, minutes => 30) };
+ok($@,"Dive outside of table's maximum depth");
+
+eval { $stn->dive(metres => 30, minutes => 30) };
+ok($@,"Dive outside of table's maximum no-deco time");
+
+eval { $stn->dive(metres => -1, minutes => 30) };
+ok($@,"Negative metric depth supplied");
+
+eval { $stn->dive(feet => -1, minutes => 30) };
+ok($@,"Negative imperial depth supplied");
+
+eval { $stn->dive(feet => 10, metres => 20, minutes => 30) };
+ok($@,"Both imperial and metric depths supplied");
+
+eval { $stn->dive(metres => 20, minutes => -30) };
+ok($@,"Negative time supplied");
+
+eval { $stn->dive(metres => 0, minutes => 30) };
+ok($@,"Zero depth supplied");
+
+eval { $stn->dive(metres => 18, minutes => 0) };
+ok($@,"Zero time supplied");
+
+eval { $stn->dive(metres => 18) };
+ok($@,"No times supplied");
+
+eval { $stn->dive(minutes => 18) };
+ok($@,"No depth supplied");
