@@ -64,7 +64,6 @@ The following methods are provided.
 use constant FEET2METRES => 0.3;
 
 # Less than 10 minutes surface is considered part of the same dive.
-# TODO - Create a test that checks < 10 minute surface dives.
 use constant MIN_SURFACE_TIME => 10;
 
 # More than MAX_SURFACE_TIME will consider us completely off-gassed.
@@ -103,7 +102,17 @@ our %SURFACE = (
 	        1*60+29 => "E", 0*60+45 => "F" },
 	G => { 12*60+ 0 => "A", 7*60+35 => "B", 4*60+25 => "C", 2*60+58 => "D",
 	        1*60+50 => "E", 1*60+15 => "F", 0*60+40 => "G" },
-	# TODO, Finish for H-K.
+	H => { 12*60+ 0 => "A", 7*60+59 => "B", 4*60+49 => "C", 3*60+20 => "D",
+	        2*60+23 => "E", 1*60+41 => "F", 1*60+06 => "G", 0*60+36 => "H"},
+	I => { 12*60+ 0 => "A", 8*60+21 => "B", 5*60+12 => "C", 3*60+43 => "D",
+	        2*60+44 => "E", 2*60+02 => "F", 1*60+29 => "G", 0*60+59 => "H",
+		0*60+33 => "I" },
+	J => { 12*60+ 0 => "A", 8*60+50 => "B", 5*60+40 => "C", 4*60+02 => "D",
+	        3*60+04 => "E", 2*60+20 => "F", 1*60+47 => "G", 1*60+19 => "H",
+		0*60+54 => "I", 0*60+31 => "J" },
+	K => { 12*60+ 0 => "A", 8*60+58 => "B", 5*60+48 => "C", 4*60+19 => "D",
+	        3*60+21 => "E", 2*60+38 => "F", 2*60+38 => "G", 1*60+35 => "H",
+		1*60+11 => "I", 0*60+49 => "J", 0*60+28 => "K" },
     },
 );
 
