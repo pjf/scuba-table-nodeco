@@ -42,11 +42,15 @@ our %LIMITS = (
 
 our %SURFACE = (
     SSI => {
-        A => { 12*60 => "A" },
-	B => { 12*60 => "A", 3*60+20 => "B" },
-	C => { 12*60 => "A", 4*60+49 => "B", 1*60+39 => "C" },
-	D => { 12*60 => "A", 5*60+48 => "B", 2*60+38 => "C", 1*60+9 => "D" },
-	# TODO, Finiish for E-K.
+        A => { 12*60+ 0 => "A" },
+	B => { 12*60+ 0 => "A", 3*60+20 => "B" },
+	C => { 12*60+ 0 => "A", 4*60+49 => "B", 1*60+39 => "C" },
+	D => { 12*60+ 0 => "A", 5*60+48 => "B", 2*60+38 => "C", 1*60+ 9 => "D"},
+	E => { 12*60+ 0 => "A", 6*60+34 => "B", 3*60+24 => "C", 1*60+57 => "D",
+                  54+ 0 => "E" },
+	F => { 12*60+ 0 => "A", 7*60+ 5 => "B", 3*60+57 => "C", 2*60+28 => "D",
+	        1*60+29 => "E", 0*60+45 => "F" },
+	# TODO, Finish for G-K.
     },
 );
 
@@ -310,6 +314,5 @@ Copyright (C) 2004 by Paul Fenwick.
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself, either Perl version 5.8.4 or,
 at your option, any later version of Perl 5 you may have available.
-
 
 =cut

@@ -6,4 +6,6 @@ t/01_interface.t
 t/02_single_dives.t
 t/03_surface.t
 t/04_rnt.t
+t/05_non_stop.t
+t/06_repetitive.t
 lib/Sport/Dive/Tables.pm
