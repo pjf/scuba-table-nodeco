@@ -1,6 +1,10 @@
 package SCUBA::Table::NoDeco;
 
+use 5.006;
+
 use strict;
+use warnings;
+
 use Carp;
 
 our $VERSION = "0.03";
@@ -305,7 +309,7 @@ depth (however see L</max_depth>).  The units argument is mandatory.
 sub max_table_depth {
 	my ($this, %args) = @_;
 	if ($args{units} eq "metres") {
-		return $RESIDUAL_DEPTHS{$this->table}[-1] 
+		return $RESIDUAL_DEPTHS{$this->table}[-1];
 	} elsif ($args{units} eq "feet") {
 		return $RESIDUAL_DEPTHS{$this->table}[-1] / FEET2METRES;
 	} else {
@@ -462,7 +466,7 @@ has no group, represented by the empty string.
 
 =cut
 
-sub group { 
+sub group {
 	my $this = shift;
 
 	# If we're below the minimum surface time for this table,
