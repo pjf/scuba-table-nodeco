@@ -1,0 +1,21 @@
+---
+abstract: "Calculate no-decompression dive times.\r"
+author:
+  - "Paul Fenwick, <pjf@cpan.org>\r"
+distribution_type: module
+generated_by: 'Module::Install version 0.77'
+license: perl
+meta-spec:
+  url: http://module-build.sourceforge.net/META-spec-v1.4.html
+  version: 1.4
+module_name: SCUBA::Table::NoDeco
+name: SCUBA-Table-NoDeco
+no_index:
+  directory:
+    - inc
+    - t
+requires:
+  perl: 5.6.0
+resources:
+  license: http://dev.perl.org/licenses/
+version: 0.03
